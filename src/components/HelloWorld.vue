@@ -1,42 +1,72 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <Motobike :name="msg"></Motobike>
+    <!-- id: là non-props sẽ không khai báo trong props -->
+    <Bicycle :name="msg" :id="msg"></Bicycle>
+    <!-- slot props -->
+    <Popup3>
+      <template v-slot:x="slotProps">
+        <h1 class="cus-con">
+          -{{ slotProps.user.name }} = {{ slotProps.user.age }}
+        </h1>
+      </template>
+    </Popup3>
+    <TabParent></TabParent>
+
+    <!-- call api http -->
+    <PostList></PostList>
+    <!-- ref in vue -->
+    <PostRef></PostRef>
+
+    <!-- mixin: mục đich tái sử dụng lại những option comon của component 
+    khi có data ở component rồi ta cẫn có thể thêm data nữa
+    nếu component có rồi thì sẽ không thêm, nếu chưa có thì bổ sung -->
+    <counter-mixin-click></counter-mixin-click>
+    <counter-mixin-hover></counter-mixin-hover>
+
+    <!-- setup -->
+    <SetupPosition :collectionName="'value colletion'"></SetupPosition>
+    <ParentComponent></ParentComponent>
+    <RefC></RefC>
   </div>
 </template>
 
 <script>
+import Motobike from "./motobike/Motobike.vue";
+import Bicycle from "./bicycle/Bicycle.vue";
+import Popup3 from "./popup/Popup3.vue";
+import TabParent from "./tabs/TabParent.vue";
+import PostRef from "./post/postref/PostRef.vue";
+import PostList from "./post/postlist/PostList.vue";
+import CounterMixinHover from "./countermixin/CounterMixinHover.vue";
+import CounterMixinClick from "./countermixin/CounterMixinClick.vue";
+import SetupPosition from "./setupOpsition/SetupPosition.vue";
+import ParentComponent from "./parentcomponent/ParentComponent.vue";
+import RefC from "./refC/RefC.vue";
+
 export default {
-  name: 'HelloWorld',
+  name: "HelloWorld",
+  components: {
+    Motobike,
+    Bicycle,
+    Popup3,
+    TabParent,
+    PostList,
+    PostRef,
+    CounterMixinClick,
+    CounterMixinHover,
+    SetupPosition,
+    ParentComponent,
+    RefC,
+  },
   props: {
-    msg: String
-  }
-}
+    msg: String,
+  },
+  provide() {
+    return { send: "hello" };
+  },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -54,5 +84,8 @@ li {
 }
 a {
   color: #42b983;
+}
+.cus-con {
+  color: rgb(207, 90, 22);
 }
 </style>

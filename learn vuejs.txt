@@ -1,0 +1,747 @@
+cài đặt môi trường:
+với npm
+npm install vue@next
+với yarn:
+yarn add vue@next
+
+cài đặt CLI:
+với yarn:
+yarn global add @vue/cli
+với npm:
+npm install -g @vue/cli
+và cuối cùng là update project:
+vue upgrade --next
+
+create project:
+-vue create <name-project> (recommend)
+build package: yarn
+run: yarn dev
+
+với npm 6.x:
+-npm init vite@latest <project-name> --template vue
+
+với npm 7+
+-npm init vite@latest <project-name> -- --template vue
+với yarn (nên sử dụng cách này):
+build package: npm install
+run: npm run dev
+
+-create vite <project-name> --template vue
+build package: yarn
+run: yarn dev
+
+ý tưởng của vuejs:
+component system là ý tưởng quan trọng trong vue. bởi vì nó như lớp trừu tượng "abstraction", cho phép chúng ta mở rộng, ứng dụng lớn.
+khép kín giữ gìn, có thể tái sử dụng component.
+tất cả ứng dụng Vue sẽ được bắt đầu với việc create new application instance. with 'createApp'. 
+application instance được sử dụng để register 'globals'. và có thể được sử dụng bởi nhiều components.
+'createApp' được sử dụng để configure rootcomponent. nó được sử dụng như starting point for render khi mount in application.
+ví dụ:
+// root component
+const RootComponent = {
+  /* options */
+}
+// create instance
+const app = Vue.createApp(RootComponent)
+// mount component and template by id
+const vm = app.mount('#app')
+
+in component instance has options:
+-data: dùng để định nghĩa các variable in component
+-methods
+-props
+-computed
+-inject
+-setup
+-watch
+ký hiệu $ đăng trước property nhằm mục đích tránh conflict (trùng) với những property mà được user define có tên giống
+
+chú ý:
+không sử dụng arrow function ở trong các options property or callback. bởi vì arrow function không có 'this'.
+
+lyfecycle hooks in Vuejs:
+cho những lựa chọn để có thể thêm code ở những giai đoạn đặc biệt.
+ví dụ: created, mounted, updated, unmounted
+gồm các thành phần:
+- init events & lifecycle
+- beforeCreate
+- init injections & reactivity
+- created
+- has 'template options'?
+- yes: compile template into render function
+- no: compile el's innerHTML as template
+- beforemount
+- create app  $el and append it to el
+- mounted (when data change)
+- beforeUpdate
+- virtual DOM re-rendered and patch
+- updated
+- (when app unmount() is called)
+- beforeUnmount
+- unmounted
+
+các thành phần trong vuejs:
+{{value}}: view giá trị trên template.
+v-html="value": output real HTML (hiện thị theo html)
+v-bind:[attributeName]="value": đươc sử dụng để gán value vào attribute của các thẻ.
+ví dụ: v-bind:href="url"
+v-on:[eventName]="function": được sử dụng đẻ gán function vào event của các thẻ
+ví dụ: v-on:click="click"
+shorthand:
+:[key]="value": tương ứng với v-bind:key
+@[event]="function": tương ứng với v-on:event
+v-if: được sử dụng để check đk.
+v-model='nameProperty': được sử dụng để two-way-binding data property 'nameProperty'.
+
+
+property in vuejs:
+có 2 cách truy cập property trong code:
+ví dụ:
+const app = Vue.createApp({
+  data() {
+    return { count: 4 }
+  }
+})
+const vm = app.mount('#app')
+console.log(vm.$data.count) // => 4
+console.log(vm.count)       // => 4
+sử dụng với $ để phân biệt giữa method của người dùng tạo.
+
+với method:
+const app = Vue.createApp({
+  data() {
+    return { count: 4 }
+  },
+  methods: {
+    increment() {
+      // `this` will refer to the component instance
+      this.count++
+    }
+  }
+})
+const vm = app.mount('#app')
+chỉ có 1 cách truy cập:
+vm.increment()
+Lưu ý: không sử dụng arrow function với method in vuejs.
+
+computed:
+được sử dụng để xử lý logic hoặc tính toán của các property trong vuejs, để có giá trị mong muốn trên template.
+được sử dụng để thực hiện call api hoặc nhận value api.
+ví dụ:
+Vue.createApp({
+  data() {
+    return {
+      author: {
+        name: 'John Doe',
+        books: [
+          'Vue 2 - Advanced Guide',
+          'Vue 3 - Basic Guide',
+          'Vue 4 - The Mystery'
+        ]
+      }
+    }
+  },
+  computed: {
+    // a computed getter
+    publishedBooksMessage() {
+      // `this` points to the vm instance
+      return this.author.books.length > 0 ? 'Yes' : 'No'
+    }
+  }
+}).mount('#computed-basics')
+trên temlate:
+<span>{{ publishedBooksMessage }}</span>
+
+khi property 'author.books' => method 'publishedBooksMessage' cũng được cập nhật lại và return new value trên template.
+computed là property trong computed sẽ có getter và setter hoặc method => view trên template sẽ là 1 property
+có thể binding-data trong computed ở trên template như một property bình thường.
+computed property được cached based trên reactive dependencies. Điều đó có nghĩa là computed properties sẽ chỉ được
+thực hiện khi some of reactive dependencies changed.
+computed properties có default chỉ có getter => return trong method in computed.
+bạn cũng có thẻ sử dụng setter nếu như bạn cần.
+lưu ý: khi sử dụng setter in computed property cần phải cập nhật
+vào những giá trị được tính toán trong getter computed property
+ví dụ:
+{
+computed:{
+  fullname:{
+    get(){
+      return '';
+    },
+    get(newVlaue){
+      // code here
+    }
+  }
+}
+}
+=> vm.fullname='xas' (setter)
+
+watch:
+được sử dụng để theo dọi 1 property thay đổi
+tên property phải giống với method trong watch và trong watch sẽ truyền 2 giá trị newvalue, oldvalue hoặc value (newValue)
+cách 1:
+ví dụ trong watch:{
+  question(newValue, oldValue){
+    // code here
+  }
+  // hoặc
+  question(value){
+    // code here
+  }
+}
+data(){
+  return {
+    question:'message'
+  }
+}
+cách 2: sử dụng với handler
+question:{
+  handler(newVal, oldVal){
+    // code here
+  },
+  // immediate: mục đích thực thi wath với lần đầu tiên khi component instance
+  immediate: true
+  // deep: mục đích thực hiện handler khi param trong property có sự cập nhật
+  // áp dụng với property có kiểu dữ liệu là object hoặc array.
+  deep: true
+}
+
+class: trong vuejs
+<div :class='{ nameClass1; true, 'class-name'; false}'></div> : truyền dưới dạng object với value boolean
+với những property nhận true sẽ hiển thì còn false sẽ không được sử dụng.
+<div :class='[property1, property2]'></div>: truyền dưới dạng mảng các property trong vuejs.
+
+style: trong vuejs
+<div :style="valueProperty"></div>
+với
+{data(){
+  return {
+    valueProperty:{
+       color: 'red',
+      fontSize: '13px'
+    }
+  }
+}}
+đây là cách truyền property object đến style.
+<div :style="[property1, property2]"></div>: truyền nhiefu properties vào 1 attribute style
+
+v-if: trong vuejs
+ví dụ:
+<h1 v-if='condition'></h1>
+với if, else if, else:
+ví dụ:
+<div v-if='condition1'></div>
+<div v-else-if='condition2></div>
+<div v-else></div>
+ngoài ra có thể sử dụng 'v-show' một cách trực tiếp
+v-show: được sử dụng để bật tắt css property của element.
+v-show không hỗ trợ template, không có v-else.
+v-if real condition rendering, v-if sẽ phụ thuộc vào đk để render lại,
+v-show thì thường được render bất kể đk nào cùng với css-based toggling.
+lưu ý: v-if không được sử dụng trong v-for.
+
+v-for trong vuejs
+<template v-for="(item,index) in items" :key="item.msg">
+    <li>{{ item.msg }}</li>
+    <li class="divider" role="presentation"></li>
+</template>
+với items là 1 mảng
+với index: thứ tự bắt đầu 0
+kết hợp với v-if:
+<template v-for="todo in todos" :key="todo.name">
+  <li v-if="!todo.isComplete">
+    {{ todo.name }}
+  </li>
+</template>
+v-for sẽ bao bọc v-if
+v-for với object:
+<li v-for="(value, name, index) in myObject">
+  {{ name }}: {{ value }}
+</li>
+với value: value
+với name: key (option)
+với index: index (option)
+để có thể theo dõi mỗi node cần được xác định, để có thể tái sử dụng, sắp xếp các phần tử,
+có thể cung cấp unique :key cho mỗi element:
+<div v-for="item in items" :key="item.id">
+  <!-- content -->
+</div>
+truyền value từ cpn parent -> cpn children (children sử dụng props: ['nameProperty'])
+truyền value từ cpn chidlren -> cpn parent (children sử dụng emits: ['nameEvent']) (nameEvent: do mình định nghĩa ra)
+lưu ý: key được sử dụng với v-for: nhằm mục đích giúp vue xác định được phần tử
+có sử updae, thêm xóa một cách chính xác để có thể xử lý update UI đúng và hiệu quả.
+key sẽ nhận một giá trị unique nhằm định danh mội node trong list các phần từ.
+
+event in vuejs:
+// file html
+ <button @click="nameFunction(paran,$event)">Click</button>
+
+ // method in file js
+ method:{
+   nameFunction(paran,event){
+     // code here
+   }
+ }
+ multi method in event:
+ <button @click="one($event), two($event)">
+  Submit
+</button>
+methods: {
+  one(event) {
+    // first handler logic...
+  },
+  two(event) {
+    // second handler logic...
+  }
+}
+
+form input binding:
+v-model: được tạo ra để two-way-binding data: 
+text:
+<input v-model="message" placeholder="edit me" />
+
+textarea:
+<textarea v-model="message" placeholder="add multiple lines"></textarea>
+
+checkbox:
+<input type="checkbox" id="checkbox" v-model="checked" />
+checked: false (có kiểu dữ liệu là boolean)
+ngoài ra có thể sử dụng:
+true-value:'valuetrue' define giá trị khi checked
+false-value:'valuefalse' define giá trị khi unchecked
+
+multicheckbox:
+<input type="checkbox" id="jack" value="Jack" v-model="checkedNames" />
+<input type="checkbox" id="john" value="John" v-model="checkedNames" />
+<input type="checkbox" id="mike" value="Mike" v-model="checkedNames" />
+data() {
+    return {
+      checkedNames: []
+    }
+  }
+mảng data 'checkedNames' là 1 mảng chứ các giá trị khi dược checked.
+
+radiobutton:
+<input type="radio" id="one" value="One" v-model="picked" />
+<input type="radio" id="two" value="Two" v-model="picked" />
+data() {
+    return {
+      picked: ''
+    }
+  }
+
+select single:
+  <select v-model="selected">
+    <option v-for="option in options" :value="option.value">
+      {{ option.text }}
+    </option>
+  </select>
+với options:
+options: [
+        { text: 'One', value: 'A' },
+        { text: 'Two', value: 'B' },
+        { text: 'Three', value: 'C' }
+      ],
+selected: ''
+
+select multi:
+<select v-model="selected" multiple>
+    <option v-for="option in options" v-bind:value="option.value">
+      {{ option.text }}
+    </option>
+</select>
+với options:
+options: [
+        { text: 'One', value: 'A' },
+        { text: 'Two', value: 'B' },
+        { text: 'Three', value: 'C' }
+      ],
+selected: []
+
+<!-- synced after "change" instead of "input" -->
+<input v-model.lazy="msg" /> thay thế cho change event.
+trong quá trình người dùng nhập thì property chưa được cập nhật
+đến khi người dùng không còn focus vào ô đó nữa thì property mới được cập nhật.
+
+<input v-model.number="age" type="number" /> : dùng để ép kiểu giá trị về number.
+
+<input v-model.trim="msg" />: dùng để bỏ khoảng trắng (whitespace) của property.
+
+component basic:
+-create a vue application:
+const app = Vue.createApp({})
+-define component with name:'button-counter'
+app.component('button-counter', {});
+-intergrate with file html by id
+app.mount('#components-demo') (#components-demo: id="components-demo")
+
+parse data from parent to chidl:
+component child:
+app.component('blog-post', {
+props:['nameProperty']
+});
+props: sẽ chứa các property được truyền từ parent to child.
+component parent:
+ <blog-post name-property="My journey with Vue"></blog-post>
+ lưu ý: có thể custom và define kiểu dữ liệu cho props:
+ ví dụ:
+ props:{
+   nameProperty:{
+     type: kiểu dữ liệu,
+     default: value default,
+     required: true
+   }
+ }
+với default: truyền giá trị mặc định
+với type: truyền kiểu dữ liệu (String, Number, Boolean)
+với required: props đó yêu cầu phải khác null và undefined
+
+non-props attribute:
+là những property không được định nghĩa trong props
+ví dụ: id, class, style attribute.
+
+
+parse child component to parent component thông qua event:
+component child: define emits:
+// cách 1:
+app.component('blog-post', {
+  emits: ['namEmit']
+})
+// cách 2: validate được giá trị trước khi thực hiện emit
+app.component('blog-post', {
+  emits: {
+    namEmit:(value) =>{
+      // code here
+      return true: nếu thoản mãn đk
+      return false: không thỏa mãn đk (warning)
+    }
+  }
+})
+cách 1: <button @click="$emit('namEmit', 0.1)"></button>
+cách 2: sử dụng với method:
+<button @click="functionName"></button>
+methods: {
+  functionName() {
+    this.$emit('namEmit', 0.1);
+  }
+}
+lúc này nameEvent truyền từ component chidl with value 0.1
+component parent sẽ nhận event và data từ component child:
+<blog-post ... @nam-emit="onEnlargeText"></blog-post>
+methods: {
+  onEnlargeText(value) {
+    // code here
+  }
+}
+lưu ý với child component property emit 'namEmit', event in parent component '@nam-emit'
+
+truyền đoạn html từ parent -> child:
+sử dụng với slot (mục đích xác định đoạn html sẽ được hiện thị trong khu vực được xác định)
+ví dụ:
+component parent:
+  <alert-box>
+    html here
+  </alert-box>
+component child:
+<div class="demo-alert-box">
+      <strong>Error!</strong>
+      <slot></slot>
+</div>
+xác định các khu vực đặt slot với slot name:
+nhằm mục đích chia nhỏ các content của component khi được nhận:
+child component:
+<slot name="nameSlot"></slot>
+parent component:
+<template v-slot:nameSlot>
+// code html here
+</temlate>
+đối với những slot không có tên thì mặc định default và vào cùng 1 nhóm
+slot props: là cách thức mà chidlren component sẽ cung cấp value
+còn parent class sẽ cung cấp form hiển thị cho chidlren component
+trong trường hợp không cung cấp form ở parent component
+thì slot sẽ lấy mặc định trong slot:
+ví dụ:
+<slot name="test" :user="user">
+  view default{{ user.name }}
+</slot>
+chidl component:
+<slot name="default" :property="value"></slot>
+mặc định name slot là default có thể thay đổi tên khác để gọi.
+paren component:
+<template v-slot:default="slotProps">
+// custom template here
+{{slotProps.property}}
+</template>
+mặc định tên slot sẽ là default, tùy vào child component đặt tên thì sẽ phải
+thay default là name slot.
+ví dụ:
+<slot name="x" :property="value"></slot>
+<template v-slot:x="slotProps">
+{{slotProps.property}}
+</template>
+
+dynamic component sử dụng với 'is' xác định tên component:
+<component :is="nameComponnet"></component>
+component: xác định thẻ component (định dạng đó là 1 component)
+is: xác định tên component
+keep-alive: mục đích giúp cho component sẽ không bị destroy.
+khi component được gọi lại sẽ không create new instance
+mà vẫn giữ được state cũ của component đó.
+
+ref: trong vuejs có tác dụng xác định element hoặc (component) trong vuejs.
+và có thể tương tác đến element hoặc (component) như focus, input,
+tương tách html, css của elment, data, method của component.
+ví dụ:
+<div ref="nameRef"></div>
+hoặc với component:
+<NameComponnet ref="nameRef></NameComponnet>
+muốn truy cập sử dụng:
+this.$refs.nameRef => element html hien tai
+hoặc giá trị, tên method trong component
+
+
+filter: trong vuejs giống với pipe trong angular
+mục đích là parse dữ liệu trước khi hiển thị.
+ví dụ:
+filter:{
+  parseData:( valueInput){
+    // code here
+    return valuePutput
+  }
+}
+template:
+{{ value | parseData }}
+
+để tạo 1 conponent cần tạo file .vue.
+trong file component vue sẽ có 3 thành phần:
+<template></template>: nơi chứa đựng các html cho UI
+<script></script>: nơi chứa các property, xử lý logic trong vuejs.
+<style></style>: nơi chứa các css của component (scoped) hoặc global
+sử dụng scoped trong style giúp xác đinh được phạm vi ảnh hưởng của các css trong application.
+nếu có slot thì các css của parent component sẽ truyền vào cho child component
+trong phạm vi của slot
+ví dụ với scoped:
+<style scoped></style>
+
+thêm một component vào component khác:
+trong phần script
+-cần import component đó
+- khai báo component đó ở
+ví dụ:
+export default {
+  name: 'App',
+  // khai bao component được sử dụng 
+  components: {
+    // component here
+  }
+}
+
+event thông qua các key:
+@keydown.nameKey, @keyup.nameKey, @keypress.nameKey: nhằm mục đích tương tác với các
+key trên dashboard.
+ví dụ:
+nameKey: enter, space, left, right,...
+@keydown.enter: khi nhấn enter
+
+v-once: giữ cho hẻ html chứa property đó nhận giá trị tĩnh, 
+khi property đó bị thay đổi trong script thì trên template property đó không đổi.
+
+v-pre: nhằm mục đích bỏ qua compilation của property và tất cả property là con của nó.
+ví dụ:
+name: 'hello'
+=> <h1 v-pre>{{name}}</h1> : {{name}}
+
+prvide/ inject:
+phục vụ nhằm mục đích truyền nhận data giữa các component với nhau mà không có quá hệ gì (cha-con)
+lưu ý: chỉ có thể gửi từ component cấp cao về các component cấp thấp hơn, ngược lại thì không áp dụng được
+
+two-way-binding wih v-model and component:
+áp dụng với input (default: value -> modelValue, input -> update:modelValue)
+component parent:
+v-model="value"
+component child:
+props:{
+  modelValue: kiểu dữ liệu
+}
+<input type="text" :value="modelValue" @input="$emit("update:modelValue",$event.target.value)">
+tự sinh emit: update:modelValue
+v-model với argument:
+parent component:
+v-model:nameProp="value"
+-> children component sẽ sinh ra 2 thành phần:
+props: ["nameProp"]
+emits: ["update:nameProp"]
+
+teleport: dùng để tách component không phục thuộc trên component chính (#app)
+phụ thuộc trên id khác.
+áp dụng: sử dụng để dùng với component popup hoặc dialog, message, toast
+ví dụ:
+<teleport to="id">
+  // component here
+</teleport>
+id: là id của file index.html
+
+htpp kết nối đến server sử dụng Axios:
+cài đặt:
+yarn add axios
+tạo file với AxiosClient.js
+để define header, authentication, response
+tạo file service: định nghĩa các api get, post, update, ...
+có sử dụng axios bên trên
+ví dụ:
+post.service.js
+sử dụng async-await với call api
+
+vue component gồm 4 phase:
+create
+mounting
+updating
+unmounting
+
+crete gồm hook:
+beforeCreate()
+created()
+
+mouting gồm hook:
+beforemount()
+mounted()
+
+updating gồm hook:
+beforeupdate()
+updated()
+
+unmounting gồm hook:
+beforeUnmount()
+unmounted()
+
+các thành phần liên quan khác:
+actived()
+deactived()
+errorCaptured()
+renderTracked()
+renderTriggered()
+
+đối với parent-child component:
+parent before created
+parent created
+parent before mounted
+child before create
+child create
+child before mounted
+child mounted
+parent mounted
+
+khi có update ở trên component:
+parent before update
+// child component handle here
+parent updated
+
+mixin: laf 1 cách linh họat để có thể phân tán những function có thể
+tái sử dụng, mixin có thể chứa đựng bât cứ options nào trong component.
+khi 1 component sử dụng mixin thì toàn bộ options ở trong mixin sẽ 
+được mix trong component
+
+composition APi in vue:
+là tính năng ở trong vue 3. cho chúng ta một cách khác để viết component
+theo đặc thù: những đoạn script được bọc trong component.
+các option API: data(), computed, watch, methods, lifecycle hook.
+
+
+setup:
+được sử dụng để có thể tương tác với template cùng với 
+2 giá trị props và context
+-props: nhận sử update mới khi có giá trị props mới đi qua.
+thì setup sẽ chạy.
+muốn sử dụng destructure với props cần toRef:
+ví dụ:
+const { title } = toRefs(props)
+nhưng nếu props là options không bắt buộc:
+ví dụ:
+const title = toRef(props, 'title')
+
+-context: là object javascript bình thường có chứa 3 properties:
++attrs
++slots
++emit
++expose
+cách 1:
+ => setup(props, context){
+   // code here
+   return;
+}
+cách 2:
+=> setup(props, {attrs, slots, emit}){
+   // code here
+   return;
+}
+
+ref(value) = reactive(value): đây là cách tạo ref:
+value có thể object, number, tring, boolean,..
+ví dụ:
+const book = reactive({ title: "Vue 3 Guide" });
+const book = ref({ title: "Vue 3 Guide" });
+-đối với reactive(): thì không thể update value với async hoặc timeout
+nếu muốn update value khi return cần ...toRefs(value)
+-đối với ref(): có thể update lại value với async hoặc timeout (recommend).
+ngoài ra trong setup chúng ta có thể add các function để xử lý các ref.
+
+khi muốn clone deep khi sử dụng với ref react:
+cần cài đặt lodash: yarn add lodash
+tiêp theo: 
+import _ from "lodash";
+và thực hiện cloneDeep(property) đối với property có data type là object
+
+provide/inject in composition API:
+component parent:
+  setup() {
+    provide(key, value);
+  },
+component child:
+setup() {
+    const valueCp = inject(key, valueDefault);
+    return {
+      valueCp,
+    };
+  },
+trong trường hợp key không tồn tại ở component child lúc đó valueCp sẽ nhận valueDefault làm giá trí nếu parent component truyền ref dưới dạng react
+thì component child sẽ return dưới dạng: '...toRefs(value),' khi nhận data từ inject
+chúng ta có thẻ truyền function từ parent to child by provide/inject.
+
+lifecycle hook with composition API:
+beforeCreate => không cần
+created => không cân
+beforemount => noBeforeMount
+mounted => onMounted
+beforeUpdate => onbeforeUpdate
+updated => onUpdated
+beforeUnmount => onbeforeUnmount
+unmounted => onUnmounted
+errorCaptured => onErrorCaptured
+renderTracked => onRenderTracked
+renderTriggered => onRenderTrigger
+
+composable: trong composition API:
+mục đích tái sử dụng lại những đoạn code được sử dụng ở nhiều component
+với composition API.
+composable giống với mixin.
+với composable có thể thêm được param làm tăng độ flexable hơn so với mixin.
+
+deploy sử dụng 'netify.com' để có thể build project front-end and github (gitlab, bitbucket).
+
+router in vue:
+cài đặt router: yarn add vue-router
+file router: quản lý router in vue
+bên trong chứa các thông tin path và component
+add .use(router) trong file main.js: để cấu hình router vào root app.
+trong file app.vue: <router-view>
+nhằm mục đích xác định nơi component sẽ hiển thị của router
+
+nếu bạn muốn tại data json từ local:
+sử dụng: json-server
+cài đặt: yarn add json-server.
+run: json-server --watch đường dẫn file json
+ví dụ:
+json-server --watch data/dbjson.json
+
+vue-katex: được sử dụng để thiết kế các công thức toán học với vuejs.
+vue-quill-editor: được sử dụng để support cho phần editor giống với ckeditor, TinyMCE,...
