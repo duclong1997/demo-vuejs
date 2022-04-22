@@ -38,9 +38,6 @@ const routes = [
         path: "/job",
         component: Job,
         name: "Job",
-        meta: {
-          requiresVisitor: true,
-        },
       },
     ],
   },
