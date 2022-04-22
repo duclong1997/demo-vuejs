@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/home/Home.vue";
+import LayoutAuth from "../views/layout/layoutAuth/LayoutAuth.vue";
 import About from "../views/about/About.vue";
 import Job from "../views/job/Job.vue";
 import JobDetail from "../views/job/jobdetail/JobDeail.vue";
@@ -29,9 +30,19 @@ const routes = [
     component: About,
   },
   {
-    path: "/job",
-    name: "Job",
-    component: Job,
+    path: "/",
+    name: "Home",
+    component: LayoutAuth,
+    children: [
+      {
+        path: "/job",
+        component: Job,
+        name: "Job",
+        meta: {
+          requiresVisitor: true,
+        },
+      },
+    ],
   },
   // redirect page
   {
